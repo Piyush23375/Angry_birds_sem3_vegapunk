@@ -43,20 +43,14 @@ public class FirstScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
-
-        // Load the background image
         backgroundTexture = new Texture(Gdx.files.internal("first_screen_bg.jpg"));
-
-        // Load the button textures (normal and hover)
         loadSavedTexture = new Texture(Gdx.files.internal("LOAD-SAVED.png"));
         loadSavedHoverTexture = new Texture(Gdx.files.internal("LOAD-SAVED_hover.png"));
         exitTexture = new Texture(Gdx.files.internal("exit.png"));
         exitHoverTexture = new Texture(Gdx.files.internal("exit_hover.png"));
         levelsHoverTexture = new Texture(Gdx.files.internal("levels_hover.png"));
 
-        // Create buttons
         ImageButton levelsButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("levels.png"))));
-        // Updated line with additional boolean parameters
         levelsButton.addListener(new HoverClickListener(levelsButton, "levels.png", "levels_hover.png", game, new LevelsScreen(game), false, false));
 
         ImageButton loadButton = new ImageButton(new TextureRegionDrawable(loadSavedTexture));
@@ -65,12 +59,11 @@ public class FirstScreen implements Screen {
         ImageButton exitButton = new ImageButton(new TextureRegionDrawable(exitTexture));
         exitButton.addListener(new HoverClickListener(exitButton, "exit.png", "exit_hover.png", game, null, true, false));
 
-        // Layout buttons in a table
         Table table = new Table();
         table.setFillParent(true);
         table.add(levelsButton).pad(10);
         table.row();
-        table.add(loadButton).padRight(150).padBottom(10); // Align Load Saved Game button
+        table.add(loadButton).padRight(150).padBottom(10);
         table.row();
         table.add(exitButton).pad(10);
 
@@ -108,12 +101,10 @@ public class FirstScreen implements Screen {
 
         @Override
         public void clicked(InputEvent event, float x, float y) {
-            // Change button style to hover when clicked
             button.getStyle().imageUp = new TextureRegionDrawable(new Texture(Gdx.files.internal(hoverTexturePath)));
-            button.setTransform(true); // Enable scaling and transformation
-            button.setScale(0.95f); // Scale the button slightly to simulate a pressed effect
+            button.setTransform(true);
+            button.setScale(0.95f);
 
-            // Delay the action to avoid immediate transition
             Gdx.app.postRunnable(() -> {
                 if (nextScreen != null) {
                     game.setScreen(nextScreen);
@@ -123,44 +114,34 @@ public class FirstScreen implements Screen {
                 } else if (isLoad) {
                     loadSavedGame();
                 }
-                // Reset to normal texture after action
                 button.getStyle().imageUp = new TextureRegionDrawable(new Texture(Gdx.files.internal(normalTexturePath)));
-                button.setScale(1.0f); // Reset scale
+                button.setScale(1.0f);
             });
         }
     }
 
     private void saveCurrentGame() {
-        // Save the current game state to a file
         FileHandle file = Gdx.files.local("saved_game.txt");
-
-        // For demonstration, let's save only the current level
-        int currentLevel = 1; // Replace with your logic to get the current level
-        String gameState = "Level: " + currentLevel + "\n"; // Add more game state information as needed
-
-        // Write the game state to the file
-        file.writeString(gameState, false); // Overwrite the existing file
-        System.out.println("Game saved: " + gameState); // Debug output
+        int currentLevel = 1;
+        String gameState = "Level: " + currentLevel + "\n";
+        file.writeString(gameState, false);
+        System.out.println("Game saved: " + gameState);
     }
 
     private void loadSavedGame() {
-        // Load the saved game state from a file
         FileHandle file = Gdx.files.local("saved_game.txt");
         if (file.exists()) {
             String gameState = file.readString();
             StringTokenizer tokenizer = new StringTokenizer(gameState, "\n");
-
-            // Retrieve level from the saved game (assuming it's stored as "Level: X")
             while (tokenizer.hasMoreTokens()) {
                 String line = tokenizer.nextToken();
                 if (line.startsWith("Level: ")) {
                     int savedLevel = Integer.parseInt(line.substring(7));
-                    game.setScreen(new GameScreen(game, savedLevel)); // Load the saved level
+                    game.setScreen(new GameScreen(game, savedLevel));
                     return;
                 }
             }
         } else {
-            // Handle case where there is no saved game
             System.out.println("No saved game found.");
         }
     }
@@ -169,7 +150,6 @@ public class FirstScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
