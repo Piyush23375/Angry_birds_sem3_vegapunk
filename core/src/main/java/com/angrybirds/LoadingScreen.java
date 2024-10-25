@@ -13,8 +13,8 @@ public class LoadingScreen implements Screen {
 
     private Game game;
     private Stage stage;
-    private Texture backgroundTexture; // Texture for the background
-    private SpriteBatch batch; // SpriteBatch to draw the background
+    private Texture backgroundTexture;
+    private SpriteBatch batch;
 
     public LoadingScreen(Game game) {
         this.game = game;
@@ -22,37 +22,25 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void show() {
-        // Initialize stage and SpriteBatch
         stage = new Stage(new ScreenViewport());
         batch = new SpriteBatch();
-
-        // Load the background image
-        backgroundTexture = new Texture(Gdx.files.internal("loading_screen_bg.jpg")); // Change the file name as needed
-
-        // Simulate asset loading or transition to the first screen after a short delay
-        // In real scenarios, you would load assets here, but for now, we move to FirstScreen
+        backgroundTexture = new Texture(Gdx.files.internal("loading_screen_bg.jpg"));
         Gdx.app.postRunnable(() -> game.setScreen(new FirstScreen(game)));
     }
 
     @Override
     public void render(float delta) {
-        // Clear the screen
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Draw the background (scales to fit the screen size)
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
-
-        // Update and draw the stage (if needed)
         stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        // Update the stage's viewport when the window is resized
         stage.getViewport().update(width, height, true);
     }
 
@@ -63,14 +51,10 @@ public class LoadingScreen implements Screen {
     public void resume() {}
 
     @Override
-    public void hide() {
-        // Do not dispose resources here as the screen might be reused later
-        // Dispose resources only when no longer needed, in the dispose() method
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
-        // Properly dispose of resources to prevent memory leaks
         backgroundTexture.dispose();
         stage.dispose();
         batch.dispose();
