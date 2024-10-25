@@ -1,4 +1,4 @@
-```java
+
 package com.angrybirds;
 
 import com.badlogic.gdx.Gdx;
