@@ -21,7 +21,6 @@ public class ScoreScreen implements Screen {
     private Skin skin;
     private SpriteBatch batch;
     private Texture backgroundTexture;
-
     private int score;
     private int stars;
 
@@ -33,21 +32,17 @@ public class ScoreScreen implements Screen {
 
     @Override
     public void show() {
-        // Initialize stage and SpriteBatch
         stage = new Stage();
         batch = new SpriteBatch();
         Gdx.input.setInputProcessor(stage);
 
-        // Load the skin and background image
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        backgroundTexture = new Texture(Gdx.files.internal("score_screen_bg.png")); // Change the file name as needed
+        backgroundTexture = new Texture(Gdx.files.internal("score_screen_bg.png"));
 
-        // Create a table to organize layout
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
 
-        // Create labels for score and stars
         Label scoreLabel = new Label("Score: " + score, skin);
         Label starsLabel = new Label("Stars: " + stars, skin);
 
@@ -57,7 +52,6 @@ public class ScoreScreen implements Screen {
 
         stage.addActor(table);
 
-        // Back Button
         Texture backButtonTexture = new Texture(Gdx.files.internal("back.png"));
         Texture backButtonHoverTexture = new Texture(Gdx.files.internal("back_hover.png"));
         Texture backButtonPressedTexture = new Texture(Gdx.files.internal("back.png"));
@@ -70,19 +64,17 @@ public class ScoreScreen implements Screen {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                game.setScreen(new PauseScreen(game, 1, null)); // Go back to the pause screen
+                game.setScreen(new PauseScreen(game, 1, null));
             }
         });
 
         Table backTable = new Table();
         backTable.setFillParent(true);
-        backTable.bottom().left(); // Position the back button table to the bottom-left corner
-        backTable.add(backButton).pad(10).size(100, 100); // Add back button with padding
+        backTable.bottom().left();
+        backTable.add(backButton).pad(10).size(100, 100);
 
-        // Add the back button table to the stage
-        stage.addActor(backTable); // Add back button
+        stage.addActor(backTable);
 
-        // Next Level Button
         Texture nextLevelButtonTexture = new Texture(Gdx.files.internal("next_level.png"));
         Texture nextLevelHoverTexture = new Texture(Gdx.files.internal("next_level_hover.png"));
         Texture nextLevelPressedTexture = new Texture(Gdx.files.internal("next_level.png"));
@@ -95,37 +87,31 @@ public class ScoreScreen implements Screen {
         nextLevelButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(game, getNextLevel())); // Move to the next level
+                game.setScreen(new GameScreen(game, getNextLevel()));
             }
         });
 
         Table nextTable = new Table();
         nextTable.setFillParent(true);
-        nextTable.bottom().right(); // Position the back button table to the bottom-left corner
-        nextTable.add(nextLevelButton).pad(10).size(100, 100); // Add back button with padding
+        nextTable.bottom().right();
+        nextTable.add(nextLevelButton).pad(10).size(100, 100);
 
-        // Add the back button table to the stage
-        stage.addActor(nextTable); // Add Next Level button
+        stage.addActor(nextTable);
     }
 
-    // A method to determine the next level
     private int getNextLevel() {
-        // Replace with logic to get the next level number
-        return 2; // Example: returns level 2
+        return 2;
     }
 
     @Override
     public void render(float delta) {
-        // Clear the screen
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Draw the background
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
 
-        // Draw the stage
         stage.act(delta);
         stage.draw();
     }
