@@ -50,16 +50,22 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        backgroundTexture = new Texture(Gdx.files.internal("game_screen_bg.png"));
+
+        // Load background for the current level
+        createBackgroundForLevel();
+
         createStructuresForLevel();
         slingshot = new Slingshot("slingshot.png", 25 * SLINGSHOT_SCALE, 50 * SLINGSHOT_SCALE, SLINGSHOT_SCALE);
         createBirdsForLevel();
+
         pauseButtonTexture = new Texture(Gdx.files.internal("pause.png"));
         pauseButtonHoverTexture = new Texture(Gdx.files.internal("pause_hover.png"));
         pauseButtonPressedTexture = new Texture(Gdx.files.internal("pause_pressed.png"));
+
         TextureRegionDrawable normalDrawable = new TextureRegionDrawable(pauseButtonTexture);
         TextureRegionDrawable hoverDrawable = new TextureRegionDrawable(pauseButtonHoverTexture);
         TextureRegionDrawable pressedDrawable = new TextureRegionDrawable(pauseButtonPressedTexture);
+
         ImageButton pauseButton = new ImageButton(normalDrawable, hoverDrawable, pressedDrawable);
         pauseButton.addListener(new ClickListener() {
             @Override
@@ -68,11 +74,28 @@ public class GameScreen implements Screen {
             }
         });
         pauseButton.setSize(120, 120);
+
         Table pauseTable = new Table();
         pauseTable.setFillParent(true);
         pauseTable.bottom().right();
         pauseTable.add(pauseButton).pad(10).size(120, 120);
         stage.addActor(pauseTable);
+    }
+
+    private void createBackgroundForLevel() {
+
+        if (backgroundTexture != null) backgroundTexture.dispose();
+
+
+        if (level == 1) {
+            backgroundTexture = new Texture(Gdx.files.internal("game_screen_bg_level1.png"));
+        } else if (level == 2) {
+            backgroundTexture = new Texture(Gdx.files.internal("game_screen_bg_level2.png"));
+        } else if (level == 3) {
+            backgroundTexture = new Texture(Gdx.files.internal("game_screen_bg_level3.png"));
+        } else {
+            backgroundTexture = new Texture(Gdx.files.internal("game_screen_bg.png"));
+        }
     }
 
     private void createStructuresForLevel() {
@@ -124,8 +147,10 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, camera.viewportWidth, camera.viewportHeight);
         float slingshotWidth = camera.viewportWidth * SLINGSHOT_SCALE;
@@ -133,11 +158,14 @@ public class GameScreen implements Screen {
         float slingshotXOffset = 20;
         float slingshotYOffset = 10;
         slingshot.draw(batch, slingshotXOffset, slingshotYOffset, slingshotWidth, slingshotHeight);
+
         for (Bird bird : birds) {
             bird.draw(batch);
         }
         renderStructures(batch);
+
         batch.end();
+
         stage.act(delta);
         stage.draw();
     }
@@ -180,3 +208,4 @@ public class GameScreen implements Screen {
         }
     }
 }
+
