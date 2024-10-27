@@ -30,4 +30,23 @@ Useful Gradle tasks and flags:
 - `test`: runs unit tests (if any).
 
 Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
+
+
+### Running the Project
+
+To get started, simply load the entire repository into your IDE. Then, open a terminal in the project directory and run:
+
+```bash
+./gradlew run
+```
+
+This command will execute the project.
+
+### Navigation
+
+Currently, a temporary button with a back arrow is available on the pause screen. This button will navigate you to the score screen. It serves as a placeholder, as the win or lose screen cannot be implemented at this stage.
+
+---
+
+Let me know if you’d like further adjustments!
 For example, `core:clean` removes `build` folder only from the `core` project.
