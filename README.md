@@ -48,5 +48,3 @@ Currently, a temporary button with a back arrow is available on the pause screen
 
 ---
 
-Let me know if you’d like further adjustments!
-For example, `core:clean` removes `build` folder only from the `core` project.
