@@ -36,4 +36,3 @@ public class Structure implements GameObject {
         texture.dispose();
     }
 }
-

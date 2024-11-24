@@ -29,10 +29,12 @@ public class GameScreen implements Screen {
     private GameObject[] structures;
     private Bird[] birds;
     private OrthographicCamera camera;
-    private static final float SLINGSHOT_SCALE = 0.05f;
-    private static final float BIRD_SCALE = 0.1f;
+
+    private static final float SLINGSHOT_SCALE = 0.037f;
+    private static final float BIRD_SCALE = 0.05f;
     private static final float STRUCTURE_SCALE = 1f;
-    private static final float YELLOW_BIRD_SCALE = 0.28f;
+    private static final float YELLOW_BIRD_SCALE = 0.1f;
+
     private Texture pauseButtonTexture;
     private Texture pauseButtonHoverTexture;
     private Texture pauseButtonPressedTexture;
@@ -55,7 +57,7 @@ public class GameScreen implements Screen {
         createBackgroundForLevel();
 
         createStructuresForLevel();
-        slingshot = new Slingshot("slingshot.png", 25 * SLINGSHOT_SCALE, 50 * SLINGSHOT_SCALE, SLINGSHOT_SCALE);
+        slingshot = new Slingshot("slingshot.png",  250, 450, SLINGSHOT_SCALE);
         createBirdsForLevel();
 
         pauseButtonTexture = new Texture(Gdx.files.internal("pause.png"));
@@ -73,6 +75,7 @@ public class GameScreen implements Screen {
                 game.setScreen(new PauseScreen(game, level, GameScreen.this));
             }
         });
+
         pauseButton.setSize(120, 120);
 
         Table pauseTable = new Table();
@@ -111,6 +114,7 @@ public class GameScreen implements Screen {
                 new MediumPig(970, 270, STRUCTURE_SCALE),
                 new Structure("wood_block.png", 1100, 250, STRUCTURE_SCALE)
             };
+
         } else if (level == 3) {
             structures = new GameObject[]{
                 new Structure("glass_rod.png", 1000, 50, STRUCTURE_SCALE),
@@ -122,20 +126,23 @@ public class GameScreen implements Screen {
     private void createBirdsForLevel() {
         if (level == 1) {
             birds = new Bird[]{
-                new RedBird(10, camera.viewportHeight + 475, BIRD_SCALE),
-                new BlueBird(10, camera.viewportHeight + 350, BIRD_SCALE)
+                new RedBird(285, 550, BIRD_SCALE),
+                new BlueBird(230, 465, BIRD_SCALE)
             };
+
         } else if (level == 2) {
             birds = new Bird[]{
                 new YellowBird(10, camera.viewportHeight + 475, YELLOW_BIRD_SCALE),
                 new BlueBird(10, camera.viewportHeight + 350, BIRD_SCALE)
             };
+
         } else if (level == 3) {
             birds = new Bird[]{
                 new RedBird(10, camera.viewportHeight + 475, BIRD_SCALE),
                 new YellowBird(10, camera.viewportHeight + 350, YELLOW_BIRD_SCALE),
                 new BlueBird(10, camera.viewportHeight + 225, BIRD_SCALE)
             };
+
         } else {
             birds = new Bird[]{
                 new RedBird(10, camera.viewportHeight + 450, BIRD_SCALE)
@@ -208,4 +215,3 @@ public class GameScreen implements Screen {
         }
     }
 }
-

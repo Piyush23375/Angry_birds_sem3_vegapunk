@@ -41,4 +41,3 @@ public class Slingshot {
         texture.dispose();
     }
 }
-

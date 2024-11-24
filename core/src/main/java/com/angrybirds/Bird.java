@@ -1,5 +1,3 @@
-//this is test2
-//testing auto update to inteliji
 package com.angrybirds;
 
 import com.badlogic.gdx.Gdx;
