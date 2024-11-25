@@ -1,5 +1,4 @@
 package com.angrybirds;
-
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -7,12 +6,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Rectangle;
 
+
 public class Bird {
     private Texture texture;
     private Vector2 position;
     private float scale;
     private Body body;
-    private boolean disposed = false;
 
     private float width;
     private float height;
@@ -37,7 +36,7 @@ public class Bird {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 1f;
+        fixtureDef.friction = 0.5f;
         fixtureDef.restitution = 0.6f; // Bounciness
 
         body.createFixture(fixtureDef);
@@ -83,15 +82,5 @@ public class Bird {
 
     public void dispose() {
         texture.dispose();
-        disposed = true;
-
-    }
-
-    public boolean isDisposed() {
-        return disposed;
-    }
-
-    public Body getBody() {
-        return body;
     }
 }

@@ -29,7 +29,7 @@ public class Slingshot {
     private Vector2 dragStart;
     private Vector2 dragCurrent;
     private boolean isDragging = false;
-    private final Vector2 BIRD_READY_POSITION = new Vector2(320, 580);
+    private final Vector2 BIRD_READY_POSITION = new Vector2(310, 575);
     private final float LAUNCH_POWER_MULTIPLIER = 0.15f;
     private final float MAX_LAUNCH_SPEED = 20f;
 
