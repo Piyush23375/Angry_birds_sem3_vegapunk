@@ -212,6 +212,7 @@ public class GameScreen implements Screen {
             gameObject.draw(batch);
         }
     }
+    }
 
     private void createBackgroundForLevel() {
         if (backgroundTexture != null) backgroundTexture.dispose();
@@ -235,22 +236,46 @@ public class GameScreen implements Screen {
         switch (level) {
             case 1:
                 structures = new GameObject[]{
-                    new Structure(world, "wood_rod.png", 170000 / PPM, 50000 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 270 / PPM, STRUCTURE_SCALE)
+                    new Structure(world, "glass_rod.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
+                    new Structure(world, "wood_block.png", 1000 / PPM, 400 / PPM, STRUCTURE_SCALE), // Block on top of the rod
+                    new Structure(world, "glass_rod.png", 1000 / PPM, 350 / PPM, STRUCTURE_SCALE), // Glass rod above the block
+                    new Structure(world, "wood_block.png", 1000 / PPM, 300 / PPM, STRUCTURE_SCALE), // Wood block above the glass rod
+                    new MediumPig(world, 1050 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
+
+                    new Structure(world, "wood_block.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
+                    new Structure(world, "wood_rod.png", 1100 / PPM, 450 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
+                    new Structure(world, "wood_block.png", 1200 / PPM, 500 / PPM, STRUCTURE_SCALE), // Another glass block to the right
+                    new Structure(world, "wood_block.png", 1200 / PPM, 600 / PPM, STRUCTURE_SCALE), // Wood block above the last glass block
+
+                    new Structure(world, "wood_rod.png", 1700 / PPM, 500 / PPM, STRUCTURE_SCALE), // Horizontal rod
+                    new Structure(world, "wood_block.png", 1700 / PPM, 400 / PPM, STRUCTURE_SCALE), // Block above the rod
+                    new MediumPig(world, 1800 / PPM, 450 / PPM, STRUCTURE_SCALE), // Pig on top of the block
+                    new Structure(world, "wood_rod.png", 1900 / PPM, 500 / PPM, STRUCTURE_SCALE), // Another horizontal rod
+                    new Structure(world, "wood_block.png", 1900 / PPM, 400 / PPM, STRUCTURE_SCALE) // Block above the second rod
                 };
                 break;
             case 2:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1000 / PPM, 100 / PPM, STRUCTURE_SCALE),
-                    new Structure(world, "glass_rod.png", 1100 / PPM, 100 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 270 / PPM, STRUCTURE_SCALE),
-                    new Structure(world, "wood_block.png", 1100 / PPM, 250 / PPM, STRUCTURE_SCALE)
+                    new Structure(world, "glass_rod.png", 1700 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
+                    new Structure(world, "wood_block.png", 1700 / PPM, 450 / PPM, STRUCTURE_SCALE), // Block on top of the rod
+                    new Structure(world, "wood_rod.png", 1600 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
+                    new MediumPig(world, 1550 / PPM, 200 / PPM, STRUCTURE_SCALE), // Pig on the wood rod
+                    new Structure(world, "wood_block.png", 1750 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
+                    new Structure(world, "wood_block.png", 1500 / PPM, 550 / PPM, STRUCTURE_SCALE), // Wood block above the glass block
+                    new Structure(world, "glass_rod.png", 1620 / PPM, 500 / PPM, STRUCTURE_SCALE) // Another base horizontal rod to the right
                 };
                 break;
             case 3:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1000 / PPM, 50 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 200 / PPM, STRUCTURE_SCALE)
+                    new Structure(world, "wood_rod.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
+                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Block on top of the rod
+                    new Structure(world, "glass_rod.png", 1000 / PPM, 450 / PPM, STRUCTURE_SCALE), // Glass rod above the block
+                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood block above the glass rod
+                    new MediumPig(world, 1050 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
+                    new Structure(world, "wood_block.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
+                    new Structure(world, "wood_rod.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
+                    new Structure(world, "wood_block.png", 1200 / PPM, 500 / PPM, STRUCTURE_SCALE), // Another glass block to the right
+                    new Structure(world, "wood_block.png", 1200 / PPM, 600 / PPM, STRUCTURE_SCALE) // Wood block above the last glass block
                 };
                 break;
         }

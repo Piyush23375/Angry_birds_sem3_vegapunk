@@ -235,22 +235,80 @@ public class GameScreen implements Screen {
         switch (level) {
             case 1:
                 structures = new GameObject[]{
-                    new Structure(world, "wood_rod.png", 170000 / PPM, 50000 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 270 / PPM, STRUCTURE_SCALE)
+                    // Left Tower - Enhanced Base
+                    new Structure(world, "wood_rod_vertical.png", 800, 460, STRUCTURE_SCALE), // Left base support
+                    new Structure(world, "wood_rod_vertical.png", 840, 460, STRUCTURE_SCALE), // Right base support
+                    new Structure(world, "wood_rod_horizontal.png", 820, 460, STRUCTURE_SCALE), // Base connector
+                    new Structure(world, "wood_rod_horizontal.png", 820, 510, STRUCTURE_SCALE), // Bottom horizontal
+                    new Structure(world, "wood_rod_vertical.png", 800, 560, STRUCTURE_SCALE), // Left middle support
+                    new Structure(world, "wood_rod_vertical.png", 840, 560, STRUCTURE_SCALE), // Right middle support
+                    new Structure(world, "wood_rod_horizontal.png", 820, 610, STRUCTURE_SCALE), // Middle horizontal
+                    new Structure(world, "wood_rod_vertical.png", 820, 660, STRUCTURE_SCALE), // Top support
+                    new MediumPig(world, 820, 710, STRUCTURE_SCALE), // Pig on top
+
+                    // Center Tower - Enhanced Base
+                    new Structure(world, "wood_rod_vertical.png", 1000, 460, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1040, 460, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1020, 460, STRUCTURE_SCALE), // Added base connector
+                    new Structure(world, "wood_rod_horizontal.png", 1020, 510, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1000, 560, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1040, 560, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1020, 610, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1020, 660, STRUCTURE_SCALE),
+                    new MediumPig(world, 1020, 710, STRUCTURE_SCALE),
+
+                    // Right Tower - Enhanced Base
+                    new Structure(world, "wood_rod_vertical.png", 1200, 460, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1240, 460, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1220, 460, STRUCTURE_SCALE), // Added base connector
+                    new Structure(world, "wood_rod_horizontal.png", 1220, 510, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1200, 560, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1240, 560, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1220, 610, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_vertical.png", 1220, 660, STRUCTURE_SCALE),
+                    new MediumPig(world, 1220, 710, STRUCTURE_SCALE),
+
+                    // Enhanced Cross Connectors
+                    new Structure(world, "wood_rod_horizontal.png", 910, 510, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1110, 510, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 910, 610, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1110, 610, STRUCTURE_SCALE),
+
+                    // Diagonal Bracing (X-pattern)
+                    new Structure(world, "wood_rod_horizontal.png", 865, 485, STRUCTURE_SCALE), // Left tower diagonal
+                    new Structure(world, "wood_rod_horizontal.png", 865, 535, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1065, 485, STRUCTURE_SCALE),
+                    new Structure(world, "wood_rod_horizontal.png", 1065, 535, STRUCTURE_SCALE ),
+                    new Structure(world, "wood_rod_horizontal.png", 1265, 485, STRUCTURE_SCALE ), // Right tower diagonal
+                    new Structure(world, "wood_rod_horizontal.png", 1265, 535, STRUCTURE_SCALE),
                 };
                 break;
+            // Add more cases for other levels as needed
+
+
+
             case 2:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1000 / PPM, 100 / PPM, STRUCTURE_SCALE),
-                    new Structure(world, "glass_rod.png", 1100 / PPM, 100 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 270 / PPM, STRUCTURE_SCALE),
-                    new Structure(world, "wood_block.png", 1100 / PPM, 250 / PPM, STRUCTURE_SCALE)
+                    new Structure(world, "glass_rod.png", 1700 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
+                    new Structure(world, "wood_block.png", 1700 / PPM, 450 / PPM, STRUCTURE_SCALE), // Block on top of the rod
+                    new Structure(world, "wood_rod.png", 1600 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
+                    new MediumPig(world, 1550 / PPM, 200 / PPM, STRUCTURE_SCALE), // Pig on the wood rod
+                    new Structure(world, "wood_block.png", 1750 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
+                    new Structure(world, "wood_block.png", 1500 / PPM, 550 / PPM, STRUCTURE_SCALE), // Wood block above the glass block
+                    new Structure(world, "glass_rod.png", 1620 / PPM, 500 / PPM, STRUCTURE_SCALE) // Another base horizontal rod to the right
                 };
                 break;
             case 3:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1000 / PPM, 50 / PPM, STRUCTURE_SCALE),
-                    new MediumPig(world, 970 / PPM, 200 / PPM, STRUCTURE_SCALE)
+                    new Structure(world, "wood_rod.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
+                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Block on top of the rod
+                    new Structure(world, "glass_rod.png", 1000 / PPM, 450 / PPM, STRUCTURE_SCALE), // Glass rod above the block
+                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood block above the glass rod
+                    new MediumPig(world, 1050 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
+                    new Structure(world, "wood_block.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
+                    new Structure(world, "wood_rod.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
+                    new Structure(world, "wood_block.png", 1200 / PPM, 500 / PPM, STRUCTURE_SCALE), // Another glass block to the right
+                    new Structure(world, "wood_block.png", 1200 / PPM, 600 / PPM, STRUCTURE_SCALE) // Wood block above the last glass block
                 };
                 break;
         }
