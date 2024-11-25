@@ -1,6 +1,6 @@
 
 package com.angrybirds;
-
+import com.badlogic.gdx.physics.box2d.*; // Box2D classes
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -11,7 +11,7 @@ public class Pig implements GameObject {
     private float width;
     private float height;
 
-    public Pig(String texturePath, float x, float y, float scale) {
+    public Pig(World world, String texturePath, float x, float y, float scale) {
         this.texture = loadTexture(texturePath);
         this.position = new Vector2(x, y);
         this.width = texture.getWidth() * scale;
