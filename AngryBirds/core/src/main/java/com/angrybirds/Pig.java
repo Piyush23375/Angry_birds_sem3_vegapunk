@@ -1,10 +1,11 @@
-
 package com.angrybirds;
+
 import com.badlogic.gdx.physics.box2d.*; // Box2D classes
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
+
 public class Pig implements GameObject {
     private Texture texture;
     private Vector2 position;
