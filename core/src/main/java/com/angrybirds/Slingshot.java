@@ -23,15 +23,15 @@ public class Slingshot {
     private Queue<Bird> birdQueue;
     private Bird currentBird;
     private Bird draggedBird;
-    private final float SLINGSHOT_PULL_LIMIT = 100f;
+    private final float SLINGSHOT_PULL_LIMIT = 50f;
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
     private Vector2 dragStart;
     private Vector2 dragCurrent;
     private boolean isDragging = false;
     private final Vector2 BIRD_READY_POSITION = new Vector2(320, 580);
-    private final float LAUNCH_POWER_MULTIPLIER = 0.15f;
-    private final float MAX_LAUNCH_SPEED = 20f;
+    private final float LAUNCH_POWER_MULTIPLIER = 0.25f;
+    private final float MAX_LAUNCH_SPEED = 15f;
 
     public Slingshot(World world, String texturePath, float x, float y, float scale, Queue<Bird> birds, OrthographicCamera camera) {
         this.birdQueue = new LinkedList<>(birds);
@@ -43,6 +43,7 @@ public class Slingshot {
         this.height = texture.getHeight() * scale;
         this.shapeRenderer = new ShapeRenderer();
 
+        // Set up the first bird
         loadNextBird();
     }
 
@@ -57,6 +58,7 @@ public class Slingshot {
     }
 
     public void draw(SpriteBatch batch, float xOffset, float yOffset) {
+        // End SpriteBatch to draw shapes
         batch.end();
 
         // Draw the drag line if dragging
@@ -116,8 +118,18 @@ public class Slingshot {
                 Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
                 Vector2 touchPoint = new Vector2(worldCoords.x, worldCoords.y);
 
-                // Only allow interaction with the current bird on the slingshot
-                if (currentBird != null && currentBird.getBoundingBox().contains(touchPoint.x, touchPoint.y)) {
+                // Define a dragging area around the slingshot
+                Rectangle dragArea = new Rectangle(
+                    position.x - width,
+                    position.y - height,
+                    width * 2,
+                    height * 2
+                );
+
+                // Only allow interaction with the current bird if it's within the slingshot's drag area
+                if (currentBird != null &&
+                    dragArea.contains(touchPoint.x, touchPoint.y) &&
+                    currentBird.getBoundingBox().contains(touchPoint.x, touchPoint.y)) {
                     draggedBird = currentBird;
                     draggedBird.setBodyType(BodyDef.BodyType.KinematicBody);
                     dragStart = new Vector2(position.x + width/2, position.y + height/2);
