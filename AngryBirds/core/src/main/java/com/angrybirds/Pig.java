@@ -10,6 +10,7 @@ public class Pig implements GameObject {
     private Vector2 position;
     private float width;
     private float height;
+    private Body body;
 
     public Pig(World world, String texturePath, float x, float y, float scale) {
         this.texture = loadTexture(texturePath);
@@ -34,5 +35,9 @@ public class Pig implements GameObject {
 
     private void disposeTexture() {
         texture.dispose();
+    }
+
+    public Body getBody() {
+        return body;
     }
 }
