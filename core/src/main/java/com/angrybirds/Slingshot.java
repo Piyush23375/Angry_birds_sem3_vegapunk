@@ -43,7 +43,6 @@ public class Slingshot {
         this.height = texture.getHeight() * scale;
         this.shapeRenderer = new ShapeRenderer();
 
-        // Set up the first bird
         loadNextBird();
     }
 
@@ -58,7 +57,6 @@ public class Slingshot {
     }
 
     public void draw(SpriteBatch batch, float xOffset, float yOffset) {
-        // End SpriteBatch to draw shapes
         batch.end();
 
         // Draw the drag line if dragging
