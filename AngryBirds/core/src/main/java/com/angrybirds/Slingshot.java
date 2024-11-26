@@ -31,7 +31,8 @@ public class Slingshot {
     private boolean isDragging = false;
     private final Vector2 BIRD_READY_POSITION = new Vector2(320, 580);
     private final float LAUNCH_POWER_MULTIPLIER = 0.25f;
-    private final float MAX_LAUNCH_SPEED = 15f;
+    private final float MAX_LAUNCH_SPEED = 14f;
+    private int currentBirdIndex = 0;
 
     public Slingshot(World world, String texturePath, float x, float y, float scale, Queue<Bird> birds, OrthographicCamera camera) {
         this.birdQueue = new LinkedList<>(birds);
@@ -54,6 +55,16 @@ public class Slingshot {
             currentBird.setBodyType(BodyDef.BodyType.StaticBody);
         } else {
             currentBird = null;
+        }
+    }
+
+    public int getCurrentBirdIndex() {
+        return currentBirdIndex;
+    }
+
+    public void setCurrentBirdIndex(int index) {
+        if (index >= 0 && index < birdQueue.size()) {
+            currentBirdIndex = index;
         }
     }
 

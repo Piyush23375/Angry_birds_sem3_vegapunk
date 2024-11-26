@@ -16,8 +16,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+
+import com.badlogic.gdx.physics.box2d.QueryCallback;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+
 import com.badlogic.gdx.InputMultiplexer;
 
 public class GameScreen implements Screen {
@@ -34,9 +41,12 @@ public class GameScreen implements Screen {
     private Bird[] birds;
     private OrthographicCamera camera;
     private PhysicsManager physicsManager;
+    private List<Bird> activeBirds = new ArrayList<>();
+    private Vector3 originalCameraPosition;
 
     private static final float SLINGSHOT_SCALE = 0.5f;
     private static final float BIRD_SCALE = 0.05f;
+    private static final float BLACK_BIRD_SCALE = 0.08f;
     private static final float STRUCTURE_SCALE = 1f;
     private static final float YELLOW_BIRD_SCALE = 0.1f;
     public static final float PPM = 100.0f;
@@ -76,6 +86,14 @@ public class GameScreen implements Screen {
         createPauseButton();
 
         setupInputProcessor();
+        // In the show() method of GameScreen
+
+    }
+    private void resetCameraPosition() {
+        if (originalCameraPosition != null) {
+            camera.position.set(originalCameraPosition);
+            camera.update();
+        }
     }
 
     private void createGround() {
@@ -83,6 +101,31 @@ public class GameScreen implements Screen {
         float platformHeight = 10 / PPM;
         platformY = 460 / PPM;
         createBox(platformWidth / 2, platformY, platformWidth, platformHeight, false);
+    }
+
+    public int getLevel() {
+        return this.level;
+    }
+
+    public GameObject[] getStructures() {
+        return this.structures;
+    }
+
+    public Bird[] getBirds() {
+        return this.birds;
+    }
+
+    public int getSlingshotCurrentBirdIndex() {
+        // Implement a method to get the current bird's index in the queue
+        return slingshot.getCurrentBirdIndex();
+    }
+
+    public float getCameraX() {
+        return camera.position.x;
+    }
+
+    public float getCameraY() {
+        return camera.position.y;
     }
 
     private Body createBox(float x, float y, float width, float height, boolean isDynamic) {
@@ -146,10 +189,36 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        // Store original camera position at the start of rendering
+        Vector3 originalCameraPosition = new Vector3(camera.position);
+
+        // Reset camera to original position before applying any shake
+        camera.position.set(originalCameraPosition);
+
+        // Apply shake if current bird is a BlackBird
+        Bird currentBird = slingshot.getCurrentBird();
+        if (currentBird instanceof BlackBird blackBird) {
+            if (blackBird.isShaking()) {
+                // Apply random shake offset
+                float shakeOffsetX = blackBird.getShakeOffset();
+                float shakeOffsetY = blackBird.getShakeOffset();
+
+                camera.position.x += shakeOffsetX;
+                camera.position.y += shakeOffsetY;
+
+                // Update shake
+                blackBird.updateShake(delta);
+            }
+        }
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         world.step(1/60f, 8, 3);
+
+        // Handle special ability input for the current bird
+        handleSpecialAbilityInput();
+
         checkBirdStateAndLaunchNext();
 
         camera.update();
@@ -164,11 +233,8 @@ public class GameScreen implements Screen {
         float slingshotYOffset = 10;
         slingshot.draw(batch, slingshotXOffset, slingshotYOffset);
 
-        for (Bird bird : birds) {
-            if (!bird.isDisposed()) {
-                bird.draw(batch);
-            }
-        }
+        // Update and render all active birds
+        updateAndRenderBirds(delta);
 
         renderStructures(batch);
         batch.end();
@@ -176,6 +242,76 @@ public class GameScreen implements Screen {
         debugRenderer.render(world, camera.combined);
         stage.act(delta);
         stage.draw();
+
+        // Optional: Ensure camera returns to original position after rendering
+        camera.position.set(originalCameraPosition);
+        camera.update();
+    }
+
+    private void handleSpecialAbilityInput() {
+        Bird currentBird = slingshot.getCurrentBird();
+        if (currentBird != null && isBirdInAir(currentBird)) {
+            // Check for touch input to activate special ability
+            if (Gdx.input.justTouched()) {
+                activateSpecialAbility(currentBird);
+            }
+        }
+    }
+
+
+    private boolean isBirdInAir(Bird bird) {
+        // Check if the bird is in the air by verifying its velocity
+        return bird.getBody().getType() == BodyDef.BodyType.DynamicBody &&
+            Math.abs(bird.getBody().getLinearVelocity().y) > 0.1f;
+    }
+
+    private void activateSpecialAbility(Bird bird) {
+        if (bird instanceof YellowBird yellowBird) {
+            if (!yellowBird.isSpecialAbilityActivated()) {
+                yellowBird.specialAbility();
+            }
+        } else if (bird instanceof BlueBird blueBird) {
+            if (!blueBird.isSpecialAbilityActivated()) {
+                Bird[] newBirds = blueBird.specialAbility();
+                // Add new birds to the active birds list
+                activeBirds.addAll(Arrays.asList(newBirds));
+            }
+        } else if (bird instanceof BlackBird blackBird) {
+            if (!blackBird.isSpecialAbilityActivated()) {
+                blackBird.specialAbility();  // Pass the world here
+            }
+        }
+    }
+
+    private void updateAndRenderBirds(float delta) {
+        // Create a copy of the active birds list to safely modify during iteration
+        List<Bird> birdsToRender = new ArrayList<>(activeBirds);
+
+        // Include the current bird from the slingshot
+        Bird currentBird = slingshot.getCurrentBird();
+        if (currentBird != null && !birdsToRender.contains(currentBird)) {
+            birdsToRender.add(currentBird);
+        }
+
+        // Update and render birds
+        for (Bird bird : new ArrayList<>(birdsToRender)) {
+            if (!bird.isDisposed()) {
+                bird.draw(batch);
+            }
+
+            // Remove birds that are out of bounds
+            if (isBirdOutOfBounds(bird)) {
+                bird.dispose();
+                activeBirds.remove(bird);
+            }
+        }
+    }
+
+    private boolean isBirdOutOfBounds(Bird bird) {
+        Vector2 position = bird.getBody().getPosition();
+        return position.x > camera.viewportWidth / PPM ||
+            position.y < 0 ||
+            position.x < 0;
     }
 
     private void checkBirdStateAndLaunchNext() {
@@ -194,8 +330,22 @@ public class GameScreen implements Screen {
                 Math.abs(velocity.y) < MINIMUM_BIRD_VELOCITY;
 
             if (isOffScreen || isSlowMoving) {
-                currentBird.dispose(); // Clean up current bird
-                slingshot.update(); // This will load the next bird
+                // If the current bird is a BlueBird that has activated its special ability,
+                // dispose of all additional birds as well
+                if (currentBird instanceof BlueBird blueBird && blueBird.isSpecialAbilityActivated()) {
+                    // Dispose of the original bird and its additional birds
+
+                    currentBird.dispose();
+
+                    // Remove the bird from active birds list
+                    activeBirds.remove(currentBird);
+                } else {
+                    // For other bird types, just dispose of the current bird
+                    currentBird.dispose();
+                }
+
+                // Load the next bird
+                slingshot.update();
             }
         }
     }
@@ -235,7 +385,7 @@ public class GameScreen implements Screen {
                     new Structure(world, "wood_block.png", 1000 , 500 , STRUCTURE_SCALE), // Block on top of the rod
                     new Structure(world, "glass_rod.png", 1000 , 550 , STRUCTURE_SCALE), // Glass rod above the block
                     new Structure(world, "wood_block.png", 1000 , 500 , STRUCTURE_SCALE), // Wood block above the glass rod
-                    new MediumPig(world, 1050 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
+                    new MediumPig(world, 1700 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
 
                     new Structure(world, "wood_block.png", 1100, 500 , STRUCTURE_SCALE), // Glass block to the right
                     new Structure(world, "wood_rod.png", 1100 , 450 , STRUCTURE_SCALE), // Wood rod above the glass block
@@ -244,7 +394,7 @@ public class GameScreen implements Screen {
 
                     new Structure(world, "wood_rod.png", 1700 , 500 , STRUCTURE_SCALE), // Horizontal rod
                     new Structure(world, "wood_block.png", 1700 , 500 , STRUCTURE_SCALE), // Block above the rod
-                    new MediumPig(world, 1800 , 450 , STRUCTURE_SCALE), // Pig on top of the block
+                    new MediumPig(world, 1800 , 470 , STRUCTURE_SCALE), // Pig on top of the block
                     new Structure(world, "wood_rod.png", 1900 , 500 , STRUCTURE_SCALE), // Another horizontal rod
                     new Structure(world, "wood_block.png", 1900 , 400 , STRUCTURE_SCALE) // Block above the second rod
                 };
@@ -259,6 +409,7 @@ public class GameScreen implements Screen {
                     new Structure(world, "wood_block.png", 1500 / PPM, 550 / PPM, STRUCTURE_SCALE), // Wood block above the glass block
                     new Structure(world, "glass_rod.png", 1620 / PPM, 500 / PPM, STRUCTURE_SCALE) // Another base horizontal rod to the right
                 };
+
                 break;
             case 3:
                 structures = new GameObject[]{
@@ -281,7 +432,8 @@ public class GameScreen implements Screen {
             case 1:
                 birds = new Bird[]{
                     new RedBird(world, 100 / PPM, platformY + 50 / PPM, BIRD_SCALE),
-                    new BlueBird(world, 50 / PPM, platformY + 50 / PPM, BIRD_SCALE)
+                    new BlueBird(world, 250 / PPM, platformY + 50 / PPM, BIRD_SCALE),
+                    new BlackBird(world, 200/PPM, platformY+ 50 /PPM, BLACK_BIRD_SCALE)
                 };
                 break;
             case 2:
@@ -289,12 +441,15 @@ public class GameScreen implements Screen {
                     new YellowBird(world, 50 / PPM, platformY + 50 / PPM, YELLOW_BIRD_SCALE),
                     new BlueBird(world, 50 / PPM, platformY - 50 / PPM, BIRD_SCALE)
                 };
+
                 break;
+
             case 3:
                 birds = new Bird[]{
                     new RedBird(world, 50 / PPM, platformY + 100 / PPM, BIRD_SCALE),
                     new YellowBird(world, 50 / PPM, platformY, YELLOW_BIRD_SCALE),
-                    new BlueBird(world, 50 / PPM, platformY - 100 / PPM, BIRD_SCALE)
+                    new BlueBird(world, 50 / PPM, platformY - 100 / PPM, BIRD_SCALE),
+                    new BlackBird(world, 200/PPM, platformY+ 50 /PPM, BLACK_BIRD_SCALE)
                 };
                 break;
             default:
@@ -323,6 +478,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        // Dispose of active birds along with other resources
+        for (Bird bird : activeBirds) {
+            bird.dispose();
+        }
+
+        // Existing dispose method continues as before
         stage.dispose();
         batch.dispose();
         skin.dispose();

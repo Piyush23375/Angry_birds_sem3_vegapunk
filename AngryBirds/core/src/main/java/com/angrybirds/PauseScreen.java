@@ -122,6 +122,8 @@ public class PauseScreen implements Screen {
         table.add(scoreButton).pad(10).size(100, 100);
 
         stage.addActor(table);
+
+
     }
 
     @Override

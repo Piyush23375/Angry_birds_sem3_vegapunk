@@ -1,5 +1,4 @@
 package com.angrybirds;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -21,17 +20,17 @@ public class Structure implements GameObject {
         this.width = texture.getWidth() * scale;
         this.height = texture.getHeight() * scale;
 
-        PhysicsManager physicsManager = new PhysicsManager(world);
-        this.body = physicsManager.createStructureBody(
-            (position.x + width / 2) / PPM,
-            (position.y + height / 2) / PPM,
-            width / PPM,
-            height / PPM,
-            DENSITY
-        );
+    PhysicsManager physicsManager = new PhysicsManager(world);
+    this.body = physicsManager.createStructureBody(
+        (position.x + width / 2) / PPM,
+        (position.y + height / 2) / PPM,
+        width / PPM,
+        height / PPM,
+        DENSITY
+    );
 
-        body.setUserData(this);
-    }
+    body.setUserData(this);
+}
 
     public void update() {
         position.set(
@@ -69,7 +68,3 @@ public class Structure implements GameObject {
         texture.dispose();
     }
 }
-
-    // Constants
-     // Pixels per meter conversion factor
-
