@@ -692,7 +692,7 @@ public class GameScreen implements Screen {
                     new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1020, 525, PIG_SCALE, 75f),
                     new Pig(world, "King_Pig.png", "King_pig_damage.png", 1050, 725, PIG_SCALE, 150f)*/
                 };
-                break; //trial
+                break; //trial success
 
             case 2:
                 structures = new GameObject[]{
