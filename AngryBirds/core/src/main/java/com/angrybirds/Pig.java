@@ -11,51 +11,96 @@ public class Pig implements GameObject {
     private Texture texture;
     private Vector2 position;
     private float width;
+    private Texture damagedtexture;
     private float height;
     private Body body;
     private float scale;
     private boolean disposed = false;
     protected float baseDensity = 1.0f;
+    private float health;
+    private float maxHealth;
 
     public static final float PPM = 100.0f; // Pixels Per Meter, matching Bird class
+    private boolean isdestroyed=false;
 
     // Physics parameters
     private float rotationDamping = 0.9f;
     private float groundFrictionMultiplier = 1.5f;
     private float maxRotationSpeed = 5.0f;
 
-    public Pig(World world, String texturePath, float x, float y, float scale) {
+    public Pig(World world, String texturePath,String damagedpath, float x, float y, float scale,float maxHealth) {
         this.texture = loadTexture(texturePath);
+        this.damagedtexture = new Texture(Gdx.files.internal(damagedpath));
         this.position = new Vector2(x, y);
-        this.scale = scale;
+
+        this.maxHealth = maxHealth;
         this.width = texture.getWidth() * scale;
         this.height = texture.getHeight() * scale;
+        this.maxHealth = maxHealth;
+        this.health = maxHealth;
 
         // Create Box2D body
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(x / PPM, y / PPM);
-        bodyDef.angularDamping = 0.5f; // Angular damping for realistic rotation
-        bodyDef.linearDamping = 0.2f; // Linear damping to reduce unrealistic sliding
+        PigPhysics pigPhysics = new PigPhysics(world);
+        this.body = pigPhysics.createStructureBody(
+            (position.x + width / 2) / PPM,
+            (position.y + height / 2) / PPM,
+            width / PPM,
+            height / PPM,
+            1f
+        );
 
-        body = world.createBody(bodyDef);
+        body.setUserData(this);
+    }
 
-        // Create circular shape for the pig
-        CircleShape shape = new CircleShape();
-        float radius = Math.min(width, height) * scale / 2 / PPM;
-        shape.setRadius(radius);
 
-        // Create fixture
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.density = baseDensity;
-        fixtureDef.friction = 1f;
-        fixtureDef.restitution = 0.5f; // Slightly less bouncy than birds
 
-        // Allow rotation but with constraints
-        body.setFixedRotation(false);
-        body.createFixture(fixtureDef);
-        shape.dispose();
+    public boolean isDestroyed() {
+        return isdestroyed;
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        this.isdestroyed = destroyed;
+    }
+    public void takeDamage(float damageAmount) {
+        health = Math.max(0, health - damageAmount);
+    }
+
+    public void heal(float healAmount) {
+        health = Math.min(maxHealth, health + healAmount);
+    }
+
+//    public boolean isDestroyed() {
+//        return health <= 0;
+//    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    public float getHealthPercentage() {
+        return (health / maxHealth) * 100f;
+    }
+
+    public void applyDamage(float damage) {
+        health -= damage;
+        if(health<0.6f*maxHealth && health>0){
+            texture=damagedtexture;
+        }
+        else if(health <= 0) {
+            isdestroyed = true;
+        }
+    }
+
+    protected void onDestroyed() {
+        // Implement destruction effects like:
+        // - Particle effects
+        // - Sound effects
+        // - Scoring
+        // - Removing from game world
     }
 
     public void setDensity(float density) {
@@ -97,20 +142,21 @@ public class Pig implements GameObject {
 
     @Override
     public void draw(Batch batch) {
-        // Rotate the sprite based on the body's angle
-        batch.draw(texture,
-            body.getPosition().x * PPM - (width / 2),
-            body.getPosition().y * PPM - (height / 2),
-            width / 2,
-            height / 2,
-            width,
-            height,
-            1, 1,
-            (float) Math.toDegrees(body.getAngle()),
-            0, 0,
-            texture.getWidth(),
-            texture.getHeight(),
-            false, false);
+        if (!isdestroyed) {// Rotate the sprite based on the body's angle
+            batch.draw(texture,
+                body.getPosition().x * PPM - (width / 2),
+                body.getPosition().y * PPM - (height / 2),
+                width / 2,
+                height / 2,
+                width,
+                height,
+                1, 1,
+                (float) Math.toDegrees(body.getAngle()),
+                0, 0,
+                texture.getWidth(),
+                texture.getHeight(),
+                false, false);
+        }
     }
 
     public void setVelocity(float x, float y) {
@@ -129,6 +175,7 @@ public class Pig implements GameObject {
     public void dispose() {
         texture.dispose();
         disposed = true;
+        isdestroyed = true;
     }
 
     private Texture loadTexture(String texturePath) {

@@ -18,8 +18,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-import com.badlogic.gdx.physics.box2d.QueryCallback;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -38,11 +36,14 @@ public class GameScreen implements Screen {
     private SpriteBatch batch;
     private Slingshot slingshot;
     private GameObject[] structures;
+    private GameObject[] pigs;
     private Bird[] birds;
     private OrthographicCamera camera;
     private PhysicsManager physicsManager;
     private List<Bird> activeBirds = new ArrayList<>();
     private Vector3 originalCameraPosition;
+    private List<Structure> structuresToDestroy = new ArrayList<>();
+    private List<Pig> pigsToDestroy = new ArrayList<>();
 
     private static final float SLINGSHOT_SCALE = 0.5f;
     private static final float BIRD_SCALE = 0.05f;
@@ -51,6 +52,7 @@ public class GameScreen implements Screen {
     private static final float YELLOW_BIRD_SCALE = 0.1f;
     public static final float PPM = 100.0f;
     private static final float MINIMUM_BIRD_VELOCITY = 0.1f;
+    private static final float PIG_SCALE = 0.5f;
 
     private Texture pauseButtonTexture;
     private Texture pauseButtonHoverTexture;
@@ -84,7 +86,7 @@ public class GameScreen implements Screen {
         createSlingshot();
 
         createPauseButton();
-
+        setupCollisionHandler();
         setupInputProcessor();
         // In the show() method of GameScreen
 
@@ -213,6 +215,8 @@ public class GameScreen implements Screen {
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        processPigDestruction();
+        processStructureDestruction();
 
         world.step(1/60f, 8, 3);
 
@@ -235,8 +239,9 @@ public class GameScreen implements Screen {
 
         // Update and render all active birds
         updateAndRenderBirds(delta);
-
+        renderPigs(batch);
         renderStructures(batch);
+
         batch.end();
 
         debugRenderer.render(world, camera.combined);
@@ -350,6 +355,15 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void renderPigs(SpriteBatch batch){
+        for(GameObject gameObject : pigs){
+            if(gameObject instanceof Pig){
+                ((Pig)gameObject).draw(batch);
+            }
+
+        }
+    }
+
     private void renderStructures(SpriteBatch batch) {
         for (GameObject gameObject : structures) {
             if (gameObject instanceof Structure) {
@@ -377,51 +391,317 @@ public class GameScreen implements Screen {
         }
     }
 
+    private float calculateDamage(float impactSpeed) {
+        // More nuanced damage calculation based on impact speed
+        // Adjust these values to balance the game
+        float baseDamage = 10f;
+        float speedMultiplier = 0.75f;
+        float calculatedDamage = baseDamage + (impactSpeed * speedMultiplier);
+
+        System.out.println("Impact Speed: " + impactSpeed +
+            ", Calculated Damage: " + calculatedDamage);
+
+        return calculatedDamage;
+    }
+
+    private void setupCollisionHandler() {
+        world.setContactListener(new ContactListener() {
+            @Override
+            public void beginContact(Contact contact) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                Body bodyA = fixtureA.getBody();
+                Body bodyB = fixtureB.getBody();
+
+                Object userDataA = bodyA.getUserData();
+                Object userDataB = bodyB.getUserData();
+
+                // Process collisions for Level 1
+                if (level == 1) {
+                    // Collision between Bird and Structure
+                    if ((userDataA instanceof Bird && userDataB instanceof Structure) ||
+                        (userDataA instanceof Structure && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Structure structure = (userDataA instanceof Structure) ? (Structure)userDataA : (Structure)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        structure.applyDamage(damage);
+
+                        System.out.println("Bird Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        printStructureHealth(structure);
+
+                        if (structure.isDestroyed()) {
+                            structuresToDestroy.add(structure);
+                        }
+                    }
+
+                    // Bird and Pig collision
+                     else if ((userDataA instanceof Bird && userDataB instanceof Pig) ||
+                        (userDataA instanceof Pig && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Pig pig = (userDataA instanceof Pig) ? (Pig)userDataA : (Pig)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        pig.applyDamage(damage);
+
+                        System.out.println("Bird-Pig Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        System.out.println("Pig Health: " + pig.getHealth() + " / " + pig.getMaxHealth());
+
+                        if (pig.isDestroyed()) {
+                            // Queue pig for removal
+                            pigsToDestroy.add(pig);
+                        }
+                    }
+                }
+
+                else if (level == 2) {
+                    if ((userDataA instanceof Bird && userDataB instanceof Structure) ||
+                        (userDataA instanceof Structure && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Structure structure = (userDataA instanceof Structure) ? (Structure)userDataA : (Structure)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        structure.applyDamage(damage);
+
+                        System.out.println("Bird Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        printStructureHealth(structure);
+
+                        if (structure.isDestroyed()) {
+                            structuresToDestroy.add(structure);
+                        }
+                    }
+
+                    // Bird and Pig collision
+                    else if ((userDataA instanceof Bird && userDataB instanceof Pig) ||
+                        (userDataA instanceof Pig && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Pig pig = (userDataA instanceof Pig) ? (Pig)userDataA : (Pig)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        pig.applyDamage(damage);
+
+                        System.out.println("Bird-Pig Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        System.out.println("Pig Health: " + pig.getHealth() + " / " + pig.getMaxHealth());
+
+                        if (pig.getHealth() <= 0 && !pig.isDestroyed()) {
+                            System.out.println("Pig is being destroyed!");
+                            pigsToDestroy.add(pig);
+                        }
+                    }
+                }
+
+                else if (level == 3) {
+                    if ((userDataA instanceof Bird && userDataB instanceof Structure) ||
+                        (userDataA instanceof Structure && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Structure structure = (userDataA instanceof Structure) ? (Structure)userDataA : (Structure)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        structure.applyDamage(damage);
+
+                        System.out.println("Bird Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        printStructureHealth(structure);
+
+                        if (structure.isDestroyed()) {
+                            structuresToDestroy.add(structure);
+                        }
+                    }
+
+                    // Bird and Pig collision
+                    else if ((userDataA instanceof Bird && userDataB instanceof Pig) ||
+                        (userDataA instanceof Pig && userDataB instanceof Bird)) {
+
+                        Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
+                        Pig pig = (userDataA instanceof Pig) ? (Pig)userDataA : (Pig)userDataB;
+
+                        Vector2 velocity = bodyA == bird.getBody() ? bodyA.getLinearVelocity() : bodyB.getLinearVelocity();
+                        float impactSpeed = velocity.len();
+
+                        float damage = calculateDamage(impactSpeed);
+                        pig.applyDamage(damage);
+
+                        System.out.println("Bird-Pig Impact Details:");
+                        System.out.println("Velocity: " + velocity);
+                        System.out.println("Impact Speed: " + impactSpeed);
+                        System.out.println("Pig Health: " + pig.getHealth() + " / " + pig.getMaxHealth());
+
+                        if (pig.getHealth() <= 0 && !pig.isDestroyed()) {
+                            System.out.println("Pig is being destroyed!");
+                            pigsToDestroy.add(pig);
+                        }
+                    }
+                }
+            }
+
+
+            @Override
+            public void endContact(Contact contact) {
+                // Not needed for this implementation
+            }
+
+            @Override
+            public void preSolve(Contact contact, Manifold oldManifold) {
+                // Not needed for this implementation
+            }
+
+            @Override
+            public void postSolve(Contact contact, ContactImpulse impulse) {
+                // Not needed for this implementation
+            }
+        });
+    }
+    public void processStructureDestruction() {
+        if (structuresToDestroy.isEmpty()) {
+            return;
+        }
+
+        // Safely remove structures outside of collision handling
+        for (Structure structure : structuresToDestroy) {
+            removeStructureAdvanced(structure);
+        }
+
+        // Clear the destruction queue
+        structuresToDestroy.clear();
+    }
+
+    public void processPigDestruction() {
+        if (pigsToDestroy.isEmpty()) {
+            return;
+        }
+
+        // Create a copy of the list to avoid concurrent modification
+        List<Pig> pigsToRemove = new ArrayList<>(pigsToDestroy);
+        pigsToDestroy.clear();
+
+        // Safely remove pigs outside of collision handling
+        for (Pig pig : pigsToRemove) {
+            if (pig != null && !pig.isDestroyed()) {
+                removePigAdvanced(pig);
+            }
+        }
+    }
+
+    private void removePigAdvanced(Pig pig) {
+        if (pig == null || pig.isDestroyed()) {
+            return;  // Prevent multiple removals
+        }
+
+        // Mark the pig as destroyed before removal
+        pig.setDestroyed(true);
+
+        // Dispose of the pig's textures
+        pig.dispose();
+
+        // Remove from the physics world
+        if (pig.getBody() != null) {
+            world.destroyBody(pig.getBody());
+        }
+
+        // Create a new list without the destroyed pig
+        List<GameObject> pigList = new ArrayList<>(Arrays.asList(pigs));
+        pigList.remove(pig);
+        pigs = pigList.toArray(new GameObject[0]);
+
+        System.out.println("Pig successfully destroyed and removed from game world");
+    }
+
+
+
+    private void printStructureHealth(Structure structure) {
+        // Print health details to the console
+        System.out.println("Structure Health Report:");
+        System.out.println("Current Health: " + structure.getHealth());
+        System.out.println("Max Health: " + structure.getMaxHealth());
+        System.out.printf("Health Percentage: %.2f%%\n", structure.getHealthPercentage());
+        System.out.println("Is Destroyed: " + structure.isDestroyed());
+        System.out.println("----------------------------");
+    }
+
+
+    private void removeStructureAdvanced(Structure structure) {
+        // Dispose of the structure's textures
+        structure.dispose();
+
+        // Remove from the physics world
+        world.destroyBody(structure.getBody());
+
+        // Create a new list without the destroyed structure
+        List<GameObject> structureList = new ArrayList<>(Arrays.asList(structures));
+        structureList.remove(structure);
+        structures = structureList.toArray(new GameObject[0]);
+
+        // Optional: Add any additional cleanup or game state update logic
+        System.out.println("Structure destroyed and removed from game world");
+    }
+
+
+
+    private Structure createStructureWithUserData(String textureName,String damagedpath, float x, float y, float scale) {
+        Structure structure = new Structure(world, textureName,damagedpath, x, y, scale);
+        structure.getBody().setUserData(structure);
+        return structure;
+    }
+
     private void createStructuresForLevel() {
         switch (level) {
             case 1:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1000 , 500 , STRUCTURE_SCALE), // Base horizontal rod
-                    new Structure(world, "wood_block.png", 1000 , 500 , STRUCTURE_SCALE), // Block on top of the rod
-                    new Structure(world, "glass_rod.png", 1000 , 550 , STRUCTURE_SCALE), // Glass rod above the block
-                    new Structure(world, "wood_block.png", 1000 , 500 , STRUCTURE_SCALE), // Wood block above the glass rod
-                    new MediumPig(world, 1700 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
-
-                    new Structure(world, "wood_block.png", 1100, 500 , STRUCTURE_SCALE), // Glass block to the right
-                    new Structure(world, "wood_rod.png", 1100 , 450 , STRUCTURE_SCALE), // Wood rod above the glass block
-                    new Structure(world, "wood_block.png", 1200 , 500 , STRUCTURE_SCALE), // Another glass block to the right
-                    new Structure(world, "wood_block.png", 1200 , 600 , STRUCTURE_SCALE), // Wood block above the last glass block
-
-                    new Structure(world, "wood_rod.png", 1700 , 500 , STRUCTURE_SCALE), // Horizontal rod
-                    new Structure(world, "wood_block.png", 1700 , 500 , STRUCTURE_SCALE), // Block above the rod
-                    new MediumPig(world, 1800 , 470 , STRUCTURE_SCALE), // Pig on top of the block
-                    new Structure(world, "wood_rod.png", 1900 , 500 , STRUCTURE_SCALE), // Another horizontal rod
-                    new Structure(world, "wood_block.png", 1900 , 400 , STRUCTURE_SCALE) // Block above the second rod
+                    new Structure(world,"Vertical_glass_block1.png", "Vertical_glass_block3.png",1000 , 500 , STRUCTURE_SCALE,70f), // Base horizontal rod
+                    new Structure(world, "Horizontal_stone_block1.png", "Horizontal_stone_block3.png",1000 , 700 , STRUCTURE_SCALE,50f)
                 };
+                pigs = new GameObject[0]; // No pigs in level 1
                 break;
+
             case 2:
                 structures = new GameObject[]{
-                    new Structure(world, "glass_rod.png", 1700 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
-                    new Structure(world, "wood_block.png", 1700 / PPM, 450 / PPM, STRUCTURE_SCALE), // Block on top of the rod
-                    new Structure(world, "wood_rod.png", 1600 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
-                    new MediumPig(world, 1550 / PPM, 200 / PPM, STRUCTURE_SCALE), // Pig on the wood rod
-                    new Structure(world, "wood_block.png", 1750 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
-                    new Structure(world, "wood_block.png", 1500 / PPM, 550 / PPM, STRUCTURE_SCALE), // Wood block above the glass block
-                    new Structure(world, "glass_rod.png", 1620 / PPM, 500 / PPM, STRUCTURE_SCALE) // Another base horizontal rod to the right
+                    new Structure(world, "Vertical_wood_block1.png","Vertical_wood_block3.png", 1000 , 500 , STRUCTURE_SCALE,25f), // Base horizontal rod
+                    new Structure(world, "Vertical_wood_block1.png", "Vertical_wood_block3.png", 1175 , 500 , STRUCTURE_SCALE,35f)  // Wood block above the glass rod
                 };
-
+                pigs = new GameObject[]{
+                    new Pig(world, "MediumPig.png","Small_pig_damage.png",1100 ,725 , PIG_SCALE,100f)
+                };
                 break;
+
             case 3:
                 structures = new GameObject[]{
-                    new Structure(world, "wood_rod.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Base horizontal rod
-                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Block on top of the rod
-                    new Structure(world, "glass_rod.png", 1000 / PPM, 450 / PPM, STRUCTURE_SCALE), // Glass rod above the block
-                    new Structure(world, "wood_block.png", 1000 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood block above the glass rod
-                    new MediumPig(world, 1050 / PPM, 250 / PPM, STRUCTURE_SCALE), // Pig on the top block
-                    new Structure(world, "wood_block.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Glass block to the right
-                    new Structure(world, "wood_rod.png", 1100 / PPM, 500 / PPM, STRUCTURE_SCALE), // Wood rod above the glass block
-                    new Structure(world, "wood_block.png", 1200 / PPM, 500 / PPM, STRUCTURE_SCALE), // Another glass block to the right
-                    new Structure(world, "wood_block.png", 1200 / PPM, 600 / PPM, STRUCTURE_SCALE) // Wood block above the last glass block
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1000 , 500 , STRUCTURE_SCALE,75f), // Base horizontal rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1175 , 500 , STRUCTURE_SCALE,75f), // Glass rod above the block
+                    new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 1000 , 700 , STRUCTURE_SCALE,25f) // Wood block above the glass rod
+                };
+
+                pigs = new GameObject[]{
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",900 ,725 , PIG_SCALE,75f)
                 };
                 break;
         }
@@ -498,6 +778,10 @@ public class GameScreen implements Screen {
 
         for (GameObject structure : structures) {
             structure.dispose();
+        }
+
+        for( GameObject pigs : pigs) {
+            pigs.dispose();
         }
 
         pauseButtonTexture.dispose();

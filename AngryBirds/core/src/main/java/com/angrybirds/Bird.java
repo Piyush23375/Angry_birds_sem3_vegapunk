@@ -52,6 +52,9 @@ public class Bird {
         // Allow rotation but with some constraints
         body.setFixedRotation(false);
         body.createFixture(fixtureDef);
+        Fixture birdfixture= body.createFixture(fixtureDef);
+        birdfixture.setUserData(this);
+        body.setUserData(this);
         shape.dispose();
     }
 
