@@ -677,36 +677,72 @@ public class GameScreen implements Screen {
         switch (level) {
             case 1:
                 structures = new GameObject[]{
-                    new Structure(world,"Vertical_glass_block1.png", "Vertical_glass_block3.png",1000 , 500 , STRUCTURE_SCALE,70f), // Base horizontal rod
-                    new Structure(world, "Horizontal_stone_block1.png", "Horizontal_stone_block3.png",1000 , 700 , STRUCTURE_SCALE,50f)
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1000 , 500 , STRUCTURE_SCALE,20f), // Base horizontal rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1150 , 500 , STRUCTURE_SCALE,20f), // Glass rod above the block
+                    new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 980 , 700 , STRUCTURE_SCALE,15f), // Wood block above the glass rod
+                    //new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1075 , 500 , STRUCTURE_SCALE,75f), // Base horizontal rod
+                    //new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1180 , 700 , STRUCTURE_SCALE,75f), // Glass rod above the block
+
                 };
-                pigs = new GameObject[0]; // No pigs in level 1
+
+                pigs = new GameObject[]{
+                    new Pig(world, "Small_Pig.png", "Small_Pig_damage.png", 1075, 540, PIG_SCALE, 75f),
+                    /*new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1100, 525, PIG_SCALE, 75f),
+                    new Pig(world, "Moustache_Pig.png", "Moustache_Pig_damage.png", 1020, 540, PIG_SCALE, 75f),
+                    new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1020, 525, PIG_SCALE, 75f),
+                    new Pig(world, "King_Pig.png", "King_pig_damage.png", 1050, 725, PIG_SCALE, 150f)*/
+                };
                 break;
 
             case 2:
                 structures = new GameObject[]{
-                    new Structure(world, "Vertical_wood_block1.png","Vertical_wood_block3.png", 1000 , 500 , STRUCTURE_SCALE,25f), // Base horizontal rod
-                    new Structure(world, "Vertical_wood_block1.png", "Vertical_wood_block3.png", 1175 , 500 , STRUCTURE_SCALE,35f)  // Wood block above the glass rod
+                    new Structure(world, "Vertical_wood_block1.png","Vertical_wood_block4.png", 1000 , 500 , STRUCTURE_SCALE,15f), // Base horizontal rod
+                    new Structure(world, "Vertical_wood_block1.png","Vertical_wood_block3.png", 1150 , 500 , STRUCTURE_SCALE,15f), // Glass rod above the block
+                    new Structure(world, "Horizontal_stone_block1.png","Horizontal_stone_block4.png", 980 , 700 , STRUCTURE_SCALE,20f), // Wood block above the glass rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1085 , 500 , STRUCTURE_SCALE,20f), // Base horizontal rod
+                    //new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1180 , 700 , STRUCTURE_SCALE,75f), // Glass rod above the block
+
                 };
+
                 pigs = new GameObject[]{
-                    new Pig(world, "MediumPig.png","Small_pig_damage.png",1100 ,725 , PIG_SCALE,100f)
+                    new Pig(world, "Moustache_Pig.png", "Moustache_Pig_damage.png", 1100, 540, PIG_SCALE, 100f),
+                    new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1100, 525, PIG_SCALE, 75f),
+                    new Pig(world, "Moustache_Pig.png", "Moustache_Pig_damage.png", 1020, 540, PIG_SCALE, 100f),
+                    new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1020, 525, PIG_SCALE, 75f),
+                    new Pig(world, "King_Pig.png", "King_pig_damage.png", 1050, 725, PIG_SCALE, 150f)
                 };
                 break;
 
             case 3:
                 structures = new GameObject[]{
-                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1000 , 500 , STRUCTURE_SCALE,75f), // Base horizontal rod
-                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1175 , 500 , STRUCTURE_SCALE,75f), // Glass rod above the block
-                    new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 1000 , 700 , STRUCTURE_SCALE,25f) // Wood block above the glass rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block4.png", 1000 , 500 , STRUCTURE_SCALE,20f), // Base horizontal rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1150 , 500 , STRUCTURE_SCALE,20f), // Glass rod above the block
+                    new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 980 , 700 , STRUCTURE_SCALE,15f), // Wood block above the glass rod
+                    new Structure(world, "Vertical_glass_block1.png","Vertical_glass_block4.png", 1030 , 700 , STRUCTURE_SCALE,10f), // Base horizontal rod
+                    new Structure(world, "Vertical_glass_block1.png","Vertical_glass_block3.png", 1100 , 700 , STRUCTURE_SCALE,10f), // Glass rod above the block
+                    //new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 1000 , 900 , STRUCTURE_SCALE,25f), // Wood block above the glass rod
+                    new Structure(world, "Vertical_stone_block1.png","Vertical_stone_block3.png", 1075 , 500 , STRUCTURE_SCALE,20f), // Base horizontal rod
+                    new Structure(world, "Horizontal_wood_block1.png","Horizontal_wood_block4.png", 980 , 900 , STRUCTURE_SCALE,15f), // Wood block above the glass rod
+
                 };
 
                 pigs = new GameObject[]{
-                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",900 ,725 , PIG_SCALE,75f)
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1100 ,540 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1100 ,525 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1020 ,540 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1020 ,525 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1100 ,560 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1100 ,580 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1020 ,560 , PIG_SCALE,75f),
+                    new Pig(world, "Small_Pig.png","Small_pig_damage.png",1020 ,580 , PIG_SCALE,75f),
+                    new Pig(world, "Moustache_Pig.png","Moustache_Pig_damage.png",1055 ,710 , PIG_SCALE,100f),
+                    new Pig(world, "Moustache_Pig.png","Moustache_Pig_damage.png",1055 ,745 , PIG_SCALE,100f),
+                    new Pig(world, "Moustache_Pig.png","Moustache_Pig_damage.png",1060 ,780 , PIG_SCALE,100f),
+                    new Pig(world, "King_Pig.png", "King_pig_damage.png", 1045, 890, PIG_SCALE, 150f)
                 };
                 break;
         }
     }
-
     private void createBirdsForLevel() {
         switch (level) {
             case 1:
