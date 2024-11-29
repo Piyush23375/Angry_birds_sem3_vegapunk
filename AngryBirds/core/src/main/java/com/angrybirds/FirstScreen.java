@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.audio.Music;
 
 import java.util.StringTokenizer;
 
@@ -29,6 +30,7 @@ public class FirstScreen implements Screen {
     private OrthographicCamera camera;
     private Texture loadSavedTexture, exitTexture;
     private Texture loadSavedHoverTexture, exitHoverTexture, levelsHoverTexture;
+    private Music backgroundMusic;
 
     public FirstScreen(Game game) {
         this.game = game;
@@ -49,6 +51,10 @@ public class FirstScreen implements Screen {
         exitTexture = new Texture(Gdx.files.internal("exit.png"));
         exitHoverTexture = new Texture(Gdx.files.internal("exit_hover.png"));
         levelsHoverTexture = new Texture(Gdx.files.internal("levels_hover.png"));
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("main_theme_song.mp3"));
+        backgroundMusic.setLooping(true); // Loop the music
+        backgroundMusic.play();
 
         ImageButton levelsButton = new ImageButton(new TextureRegionDrawable(new Texture(Gdx.files.internal("levels.png"))));
         levelsButton.addListener(new HoverClickListener(levelsButton, "levels.png", "levels_hover.png", game, new LevelsScreen(game), false, false));
@@ -132,19 +138,26 @@ public class FirstScreen implements Screen {
         FileHandle file = Gdx.files.local("saved_game.txt");
         if (file.exists()) {
             String gameState = file.readString();
-            StringTokenizer tokenizer = new StringTokenizer(gameState, "\n");
-            while (tokenizer.hasMoreTokens()) {
-                String line = tokenizer.nextToken();
-                if (line.startsWith("Level: ")) {
-                    int savedLevel = Integer.parseInt(line.substring(7));
+            System.out.println("Saved Game Content: " + gameState);
+
+            // Parse the level number from the saved game file
+            if (gameState.startsWith("Level: ")) {
+                try {
+                    int savedLevel = Integer.parseInt(gameState.substring(7).trim());
+                    System.out.println("Loaded saved level: " + savedLevel);
                     game.setScreen(new GameScreen(game, savedLevel));
                     return;
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parsing saved level: " + e.getMessage());
                 }
+            } else {
+                System.out.println("Saved game format is incorrect.");
             }
         } else {
             System.out.println("No saved game found.");
         }
     }
+
 
     @Override
     public void render(float delta) {
@@ -173,7 +186,9 @@ public class FirstScreen implements Screen {
     public void resume() {}
 
     @Override
-    public void hide() {}
+    public void hide() {if (backgroundMusic != null && backgroundMusic.isPlaying()) {
+        backgroundMusic.stop();
+    }}
 
     @Override
     public void dispose() {
@@ -182,5 +197,9 @@ public class FirstScreen implements Screen {
         exitTexture.dispose();
         stage.dispose();
         batch.dispose();
+        if (backgroundMusic != null) {
+            backgroundMusic.dispose();
+        }
+
     }
 }

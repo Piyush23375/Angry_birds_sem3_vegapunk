@@ -3,6 +3,10 @@ buildscript {
   repositories {
     gradlePluginPortal()
   }
+  ext {
+    gdxVersion = '1.12.1'  // Use latest stable version
+    box2dVersion = '1.12.1'
+  }
   dependencies {
     if(enableGraalNative == 'true') {
       classpath "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin:0.9.28"
@@ -28,6 +32,8 @@ if (JavaVersion.current().isJava9Compatible()) {
 }
 
 dependencies {
+  implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-box2d:$box2dVersion"
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
   implementation "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"

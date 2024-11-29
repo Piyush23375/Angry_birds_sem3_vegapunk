@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 
 public class LevelsScreen implements Screen {
 
@@ -23,6 +25,7 @@ public class LevelsScreen implements Screen {
     private Texture backgroundTexture;
     private SpriteBatch batch;
     private OrthographicCamera camera;
+    private Music backgroundMusic;
     public LevelsScreen(Game game) {
         this.game = game;
 
@@ -38,15 +41,16 @@ public class LevelsScreen implements Screen {
         batch = new SpriteBatch();
         Gdx.input.setInputProcessor(stage);
 
-
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         backgroundTexture = new Texture(Gdx.files.internal("levels_screen_bg.png"));
-
 
         ImageButton level1Button = createLevelButton("level1.png", "level1_hover.png", 1, 100, 100);
         ImageButton level2Button = createLevelButton("level2.png", "level2_hover.png", 2, 100, 100);
         ImageButton level3Button = createLevelButton("level3.png", "level3_hover.png", 3, 100, 100);
 
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("main_theme_song.mp3"));
+        backgroundMusic.setLooping(true); // Loop the music
+        backgroundMusic.play();
 
         ImageButton backButton = createBackButton(100, 100);
 
@@ -58,15 +62,15 @@ public class LevelsScreen implements Screen {
         levelTable1.add(level1Button).pad(10).size(200, 200);
 
         levelTable2.center();
-        levelTable2.add(level2Button).pad(10).size(200, 200);
+        levelTable2.add(level2Button).pad(10).size(260, 260);
 
         levelTable3.center();
         levelTable3.add(level3Button).pad(10).size(200, 200);
 
 
-        levelTable1.setPosition(980, 225);
-        levelTable2.setPosition(980, 470);
-        levelTable3.setPosition(985, 720);
+        levelTable1.setPosition(975, 225);
+        levelTable2.setPosition(985, 470);
+        levelTable3.setPosition(970, 720);
 
         stage.addActor(levelTable1);
         stage.addActor(levelTable2);
@@ -83,27 +87,34 @@ public class LevelsScreen implements Screen {
         stage.addActor(backTable);
     }
 
+    private void saveGame(int levelNumber) {
+        FileHandle file = Gdx.files.local("saved_game.txt");
+        String gameState = "Level: " + levelNumber + "\n";
+        file.writeString(gameState, false); // Overwrites the file
+        System.out.println("Game saved: " + gameState);
+    }
+
     private ImageButton createLevelButton(String normalImagePath, String hoverImagePath, int levelNumber, float width, float height) {
-        // Load normal and hover textures
         Texture normalTexture = new Texture(Gdx.files.internal(normalImagePath));
         Texture hoverTexture = new Texture(Gdx.files.internal(hoverImagePath));
-
 
         TextureRegionDrawable normalDrawable = new TextureRegionDrawable(normalTexture);
         TextureRegionDrawable hoverDrawable = new TextureRegionDrawable(hoverTexture);
 
-
         ImageButton levelButton = new ImageButton(normalDrawable, hoverDrawable);
         levelButton.setSize(width, height);
+
         levelButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                saveGame(levelNumber); // Save the clicked level
                 game.setScreen(new GameScreen(game, levelNumber));
             }
         });
 
         return levelButton;
     }
+
 
     private ImageButton createBackButton(float width, float height) {
 
@@ -161,9 +172,9 @@ public class LevelsScreen implements Screen {
     public void resume() {}
 
     @Override
-    public void hide() {
-
-    }
+    public void hide() {if (backgroundMusic != null && backgroundMusic.isPlaying()) {
+        backgroundMusic.stop();
+    }}
 
     @Override
     public void dispose() {
@@ -171,6 +182,9 @@ public class LevelsScreen implements Screen {
         stage.dispose();
         skin.dispose();
         batch.dispose();
+        if (backgroundMusic != null) {
+            backgroundMusic.dispose();
+        }
     }
 }
 

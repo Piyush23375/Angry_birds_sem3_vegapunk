@@ -25,8 +25,6 @@ public class PauseScreen implements Screen {
     private Texture backgroundTexture;
     private SpriteBatch batch;
     private OrthographicCamera camera;
-    private int score = 150;
-    private int stars = 3;
 
     public PauseScreen(Game game, int level, GameScreen gameScreen) {
         this.game = game;
@@ -94,22 +92,6 @@ public class PauseScreen implements Screen {
             }
         });
 
-        Texture scoreButtonTexture = new Texture(Gdx.files.internal("score.png"));
-        Texture scoreButtonHoverTexture = new Texture(Gdx.files.internal("score_hover.png"));
-        Texture scoreButtonPressedTexture = new Texture(Gdx.files.internal("score.png"));
-
-        TextureRegionDrawable scoreNormalDrawable = new TextureRegionDrawable(scoreButtonTexture);
-        TextureRegionDrawable scoreHoverDrawable = new TextureRegionDrawable(scoreButtonHoverTexture);
-        TextureRegionDrawable scorePressedDrawable = new TextureRegionDrawable(scoreButtonPressedTexture);
-
-        ImageButton scoreButton = new ImageButton(scoreNormalDrawable, scoreHoverDrawable, scorePressedDrawable);
-        scoreButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                game.setScreen(new ScoreScreen(game, score, stars));
-            }
-        });
-
         Table table = new Table();
         table.setFillParent(true);
         table.left();
@@ -118,12 +100,8 @@ public class PauseScreen implements Screen {
         table.add(levelsButton).pad(10).size(100, 100);
         table.row();
         table.add(resumeButton).pad(10).size(100, 100);
-        table.row();
-        table.add(scoreButton).pad(10).size(100, 100);
 
         stage.addActor(table);
-
-
     }
 
     @Override
@@ -165,4 +143,3 @@ public class PauseScreen implements Screen {
         batch.dispose();
     }
 }
-

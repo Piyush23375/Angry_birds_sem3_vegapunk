@@ -15,9 +15,21 @@ dependencies {
   api "com.github.tommyettinger:libgdx-utils-box2d:$utilsBox2dVersion"
   api "com.github.tommyettinger:libgdx-utils:$utilsVersion"
   api "com.kotcrab.vis:vis-ui:$visUiVersion"
+  testImplementation 'org.mockito:mockito-core:5.3.1'
+  testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+
+
+
+
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
 
   }
+}
+test {
+  useJUnitPlatform()
 }

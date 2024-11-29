@@ -17,6 +17,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +46,7 @@ public class GameScreen implements Screen {
     private Vector3 originalCameraPosition;
     private List<Structure> structuresToDestroy = new ArrayList<>();
     private List<Pig> pigsToDestroy = new ArrayList<>();
+    private boolean gamePaused = false;
 
     private static final float SLINGSHOT_SCALE = 0.5f;
     private static final float BIRD_SCALE = 0.05f;
@@ -57,6 +60,13 @@ public class GameScreen implements Screen {
     private Texture pauseButtonTexture;
     private Texture pauseButtonHoverTexture;
     private Texture pauseButtonPressedTexture;
+    private Music backgroundMusic;
+    private Texture giveUpTexture;
+    private Texture giveUpHoverTexture;
+    private Texture endLevelTexture;
+    private Texture endLevelHoverTexture;
+    private ImageButton giveUpButton;
+    private ImageButton endLevelButton;
 
     private float platformY;
 
@@ -78,6 +88,10 @@ public class GameScreen implements Screen {
         physicsManager = new PhysicsManager(world);
         debugRenderer = new Box2DDebugRenderer();
 
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("level1_sound.mp3"));
+        backgroundMusic.setLooping(true); // Loop the music
+        backgroundMusic.play();
+
         createGround();
 
         createBackgroundForLevel();
@@ -88,14 +102,89 @@ public class GameScreen implements Screen {
         createPauseButton();
         setupCollisionHandler();
         setupInputProcessor();
-        // In the show() method of GameScreen
-
+        createGiveUpAndEndLevelButtons();
     }
+
     private void resetCameraPosition() {
         if (originalCameraPosition != null) {
             camera.position.set(originalCameraPosition);
             camera.update();
         }
+    }
+
+    private void createGiveUpAndEndLevelButtons() {
+
+        giveUpTexture = new Texture(Gdx.files.internal("give_up_button.png"));
+        giveUpHoverTexture = new Texture(Gdx.files.internal("give_up_button_hover.png"));
+        endLevelTexture = new Texture(Gdx.files.internal("end_level_button.png"));
+        endLevelHoverTexture = new Texture(Gdx.files.internal("end_level_button_hover.png"));
+
+        // Create Give Up button
+        TextureRegionDrawable giveUpNormal = new TextureRegionDrawable(giveUpTexture);
+        TextureRegionDrawable giveUpHover = new TextureRegionDrawable(giveUpHoverTexture);
+        giveUpButton = new ImageButton(giveUpNormal, giveUpHover);
+        giveUpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new LoseScreen(game, level));
+            }
+        });
+
+        // Create End Level button
+        TextureRegionDrawable endLevelNormal = new TextureRegionDrawable(endLevelTexture);
+        TextureRegionDrawable endLevelHover = new TextureRegionDrawable(endLevelHoverTexture);
+        endLevelButton = new ImageButton(endLevelNormal, endLevelHover);
+        endLevelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new WinScreen(game, level));
+            }
+        });
+
+        // Create tables for positioning
+        Table giveUpTable = new Table();
+        giveUpTable.setFillParent(true);
+        giveUpTable.top().right();
+        giveUpTable.add(giveUpButton).pad(10).size(120, 120);
+
+        Table endLevelTable = new Table();
+        endLevelTable.setFillParent(true);
+        endLevelTable.top().left();
+        endLevelTable.add(endLevelButton).pad(10).size(120, 120);
+
+        // Add to stage
+        stage.addActor(giveUpTable);
+        stage.addActor(endLevelTable);
+
+        // Initially hide both buttons
+        giveUpButton.setVisible(false);
+        endLevelButton.setVisible(false);
+    }
+
+    private void createPauseButton() {
+        pauseButtonTexture = new Texture(Gdx.files.internal("pause.png"));
+        pauseButtonHoverTexture = new Texture(Gdx.files.internal("pause_hover.png"));
+        pauseButtonPressedTexture = new Texture(Gdx.files.internal("pause_pressed.png"));
+
+        TextureRegionDrawable normalDrawable = new TextureRegionDrawable(pauseButtonTexture);
+        TextureRegionDrawable hoverDrawable = new TextureRegionDrawable(pauseButtonHoverTexture);
+        TextureRegionDrawable pressedDrawable = new TextureRegionDrawable(pauseButtonPressedTexture);
+
+        ImageButton pauseButton = new ImageButton(normalDrawable, hoverDrawable, pressedDrawable);
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                game.setScreen(new PauseScreen(game, level, GameScreen.this));
+            }
+        });
+
+        pauseButton.setSize(120, 120);
+
+        Table pauseTable = new Table();
+        pauseTable.setFillParent(true);
+        pauseTable.bottom().right();
+        pauseTable.add(pauseButton).pad(10).size(120, 120);
+        stage.addActor(pauseTable);
     }
 
     private void createGround() {
@@ -153,34 +242,9 @@ public class GameScreen implements Screen {
 
     private void createSlingshot() {
         LinkedList<Bird> birdQueue = new LinkedList<>(Arrays.asList(birds));
-        slingshot = new Slingshot(world, "slingshot.png", 250, 450, 0.3f, birdQueue, camera);
+        slingshot = new Slingshot(world, "slingshot.png","angry-birds-slingshot.mp3", 250, 450, 0.3f, birdQueue, camera);
     }
 
-    private void createPauseButton() {
-        pauseButtonTexture = new Texture(Gdx.files.internal("pause.png"));
-        pauseButtonHoverTexture = new Texture(Gdx.files.internal("pause_hover.png"));
-        pauseButtonPressedTexture = new Texture(Gdx.files.internal("pause_pressed.png"));
-
-        TextureRegionDrawable normalDrawable = new TextureRegionDrawable(pauseButtonTexture);
-        TextureRegionDrawable hoverDrawable = new TextureRegionDrawable(pauseButtonHoverTexture);
-        TextureRegionDrawable pressedDrawable = new TextureRegionDrawable(pauseButtonPressedTexture);
-
-        ImageButton pauseButton = new ImageButton(normalDrawable, hoverDrawable, pressedDrawable);
-        pauseButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
-                game.setScreen(new PauseScreen(game, level, GameScreen.this));
-            }
-        });
-
-        pauseButton.setSize(120, 120);
-
-        Table pauseTable = new Table();
-        pauseTable.setFillParent(true);
-        pauseTable.bottom().right();
-        pauseTable.add(pauseButton).pad(10).size(120, 120);
-        stage.addActor(pauseTable);
-    }
 
     private void setupInputProcessor() {
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
@@ -189,12 +253,69 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
+    private void checkGameState() {
+        // Defensive null checks
+        if (pigs == null || slingshot == null || birds == null || activeBirds == null) {
+            return; // Or handle this error appropriately
+        }
+
+        boolean allPigsDestroyed = true;
+        boolean anyPigsRemaining = false;
+        for (GameObject pigObject : pigs) {
+            if (pigObject == null) continue; // Skip null objects
+
+            if (pigObject instanceof Pig pig) {
+                if (pig != null && !pig.isDestroyed()) {
+                    allPigsDestroyed = false;
+                    anyPigsRemaining = true;
+                }
+            }
+        }
+
+        // Null-safe bird checks
+//        boolean allBirdsUsed = slingshot.getCurrentBirdIndex() >= birds.length;
+        boolean allBirdsInactive = true;
+
+        // Check if all active birds are out of play
+        if (activeBirds != null) {
+            for (Bird bird : birds) {
+                if (bird != null && !bird.isDisposed()) {
+                    allBirdsInactive = false;
+                    break;
+                }
+            }
+        }
+
+        // Null-safe current bird check
+//        Bird currentBird = slingshot.getCurrentBird();
+//        boolean currentBirdUnusable = currentBird == null ||
+//            (currentBird.getBody() == null) ||
+//            (currentBird.getBody().getType() != BodyDef.BodyType.DynamicBody);
+
+        // Win condition
+
+        if (allPigsDestroyed) {
+            if (game != null) {
+                System.out.println("redirected to win screen");
+                giveUpButton.setVisible(false);
+                endLevelButton.setVisible(true);
+            }
+        }
+
+        // Lose condition
+        else if ((allBirdsInactive && anyPigsRemaining) ) {
+            if (game != null) {
+                System.out.println("redirected to lose screen");
+                giveUpButton.setVisible(true);
+                endLevelButton.setVisible(false);
+            }
+        }
+    }
+
     @Override
     public void render(float delta) {
-        // Store original camera position at the start of rendering
         Vector3 originalCameraPosition = new Vector3(camera.position);
 
-        // Reset camera to original position before applying any shake
         camera.position.set(originalCameraPosition);
 
         // Apply shake if current bird is a BlackBird
@@ -213,11 +334,14 @@ public class GameScreen implements Screen {
             }
         }
 
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         processPigDestruction();
         processStructureDestruction();
 
+        checkGameState();
         world.step(1/60f, 8, 3);
 
         // Handle special ability input for the current bird
@@ -252,6 +376,17 @@ public class GameScreen implements Screen {
         camera.position.set(originalCameraPosition);
         camera.update();
     }
+    public void simulatePauseButtonClick() {
+        game.setScreen(new PauseScreen(game, level, this));
+    }
+
+    public void simulateGiveUpButtonClick() {
+        game.setScreen(new LoseScreen(game, level));
+    }
+
+    public void simulateEndLevelButtonClick() {
+        game.setScreen(new WinScreen(game, level));
+    }
 
     private void handleSpecialAbilityInput() {
         Bird currentBird = slingshot.getCurrentBird();
@@ -262,7 +397,6 @@ public class GameScreen implements Screen {
             }
         }
     }
-
 
     private boolean isBirdInAir(Bird bird) {
         // Check if the bird is in the air by verifying its velocity
@@ -352,6 +486,7 @@ public class GameScreen implements Screen {
                 // Load the next bird
                 slingshot.update();
             }
+
         }
     }
 
@@ -360,7 +495,6 @@ public class GameScreen implements Screen {
             if(gameObject instanceof Pig){
                 ((Pig)gameObject).draw(batch);
             }
-
         }
     }
 
@@ -443,7 +577,7 @@ public class GameScreen implements Screen {
                     }
 
                     // Bird and Pig collision
-                     else if ((userDataA instanceof Bird && userDataB instanceof Pig) ||
+                    else if ((userDataA instanceof Bird && userDataB instanceof Pig) ||
                         (userDataA instanceof Pig && userDataB instanceof Bird)) {
 
                         Bird bird = (userDataA instanceof Bird) ? (Bird)userDataA : (Bird)userDataB;
@@ -610,20 +744,17 @@ public class GameScreen implements Screen {
                 removePigAdvanced(pig);
             }
         }
+
     }
 
     private void removePigAdvanced(Pig pig) {
         if (pig == null || pig.isDestroyed()) {
-            return;  // Prevent multiple removals
+            return;
         }
 
-        // Mark the pig as destroyed before removal
         pig.setDestroyed(true);
 
-        // Dispose of the pig's textures
         pig.dispose();
-
-        // Remove from the physics world
         if (pig.getBody() != null) {
             world.destroyBody(pig.getBody());
         }
@@ -636,8 +767,6 @@ public class GameScreen implements Screen {
         System.out.println("Pig successfully destroyed and removed from game world");
     }
 
-
-
     private void printStructureHealth(Structure structure) {
         // Print health details to the console
         System.out.println("Structure Health Report:");
@@ -648,24 +777,18 @@ public class GameScreen implements Screen {
         System.out.println("----------------------------");
     }
 
-
     private void removeStructureAdvanced(Structure structure) {
-        // Dispose of the structure's textures
+
         structure.dispose();
 
-        // Remove from the physics world
         world.destroyBody(structure.getBody());
 
-        // Create a new list without the destroyed structure
         List<GameObject> structureList = new ArrayList<>(Arrays.asList(structures));
         structureList.remove(structure);
         structures = structureList.toArray(new GameObject[0]);
 
-        // Optional: Add any additional cleanup or game state update logic
         System.out.println("Structure destroyed and removed from game world");
     }
-
-
 
     private Structure createStructureWithUserData(String textureName,String damagedpath, float x, float y, float scale) {
         Structure structure = new Structure(world, textureName,damagedpath, x, y, scale);
@@ -686,7 +809,8 @@ public class GameScreen implements Screen {
                 };
 
                 pigs = new GameObject[]{
-                    new Pig(world, "Small_Pig.png", "Small_Pig_damage.png", 1075, 540, PIG_SCALE, 75f),
+                    //new Pig(world, "Small_Pig.png", "Small_Pig_damage.png", 1075, 540, PIG_SCALE, 75f),
+                    new Pig(world, "Small_Pig.png", "Small_Pig_damage.png", 1075, 720, PIG_SCALE, 75f),
                     /*new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1100, 525, PIG_SCALE, 75f),
                     new Pig(world, "Moustache_Pig.png", "Moustache_Pig_damage.png", 1020, 540, PIG_SCALE, 75f),
                     new Pig(world, "Small_Pig.png", "Small_pig_damage.png", 1020, 525, PIG_SCALE, 75f),
@@ -743,6 +867,7 @@ public class GameScreen implements Screen {
                 break;
         }
     }
+
     private void createBirdsForLevel() {
         switch (level) {
             case 1:
@@ -755,16 +880,14 @@ public class GameScreen implements Screen {
             case 2:
                 birds = new Bird[]{
                     new YellowBird(world, 50 / PPM, platformY + 50 / PPM, YELLOW_BIRD_SCALE),
-                    new BlueBird(world, 50 / PPM, platformY - 50 / PPM, BIRD_SCALE)
+                    new BlackBird(world, 50 / PPM, platformY - 50 / PPM, BLACK_BIRD_SCALE)
                 };
 
                 break;
-
             case 3:
                 birds = new Bird[]{
                     new RedBird(world, 50 / PPM, platformY + 100 / PPM, BIRD_SCALE),
                     new YellowBird(world, 50 / PPM, platformY, YELLOW_BIRD_SCALE),
-                    new BlueBird(world, 50 / PPM, platformY - 100 / PPM, BIRD_SCALE),
                     new BlackBird(world, 200/PPM, platformY+ 50 /PPM, BLACK_BIRD_SCALE)
                 };
                 break;
@@ -789,6 +912,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
+        if (backgroundMusic != null && backgroundMusic.isPlaying()) {
+            backgroundMusic.stop();
+        }
         dispose();
     }
 
@@ -798,7 +924,6 @@ public class GameScreen implements Screen {
         for (Bird bird : activeBirds) {
             bird.dispose();
         }
-
         // Existing dispose method continues as before
         stage.dispose();
         batch.dispose();
@@ -820,8 +945,22 @@ public class GameScreen implements Screen {
             pigs.dispose();
         }
 
+        if (backgroundMusic != null) {
+            backgroundMusic.dispose();
+        }
+
         pauseButtonTexture.dispose();
         pauseButtonHoverTexture.dispose();
         pauseButtonPressedTexture.dispose();
+
+    }
+
+    public void pauseButtonClicked() {
+        System.out.println("Game Paused");
+        gamePaused = true;
+    }
+
+    public boolean isPaused() {
+        return gamePaused;
     }
 }

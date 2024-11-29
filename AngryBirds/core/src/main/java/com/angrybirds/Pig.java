@@ -52,8 +52,6 @@ public class Pig implements GameObject {
         body.setUserData(this);
     }
 
-
-
     public boolean isDestroyed() {
         return isdestroyed;
     }

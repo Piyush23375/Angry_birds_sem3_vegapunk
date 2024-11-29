@@ -1,6 +1,7 @@
 package com.angrybirds;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.files.FileHandle;
 
 public class MainMenuScreen implements Screen {
 
@@ -31,6 +33,8 @@ public class MainMenuScreen implements Screen {
     private Texture playHoverTexture;
     private Texture exitTexture;
     private Texture exitHoverTexture;
+    private Music backgroundMusic;
+    private boolean gamePlayed = false;
 
     public MainMenuScreen(Game game) {
         this.game = game;
@@ -49,6 +53,10 @@ public class MainMenuScreen implements Screen {
         playHoverTexture = new Texture(Gdx.files.internal("Play_hover.png"));
         exitTexture = new Texture(Gdx.files.internal("exit.png"));
         exitHoverTexture = new Texture(Gdx.files.internal("EXIT_hover.png"));
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("main_theme_song.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
 
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playTexture)));
         playButton.addListener(new HoverClickListener(playButton, "Play.png", "Play_hover.png", game, new FirstScreen(game), false, false));
@@ -103,7 +111,9 @@ public class MainMenuScreen implements Screen {
     public void resume() {}
 
     @Override
-    public void hide() {}
+    public void hide() {if (backgroundMusic != null && backgroundMusic.isPlaying()) {
+        backgroundMusic.stop();
+    }}
 
     @Override
     public void dispose() {
@@ -115,6 +125,20 @@ public class MainMenuScreen implements Screen {
         playHoverTexture.dispose();
         exitTexture.dispose();
         exitHoverTexture.dispose();
+
+        if (backgroundMusic != null) {
+            backgroundMusic.dispose();
+        }
+    }
+
+    public void playButtonClicked() {
+        System.out.println("Game Played");
+        gamePlayed = true;
+    }
+
+
+    public boolean isPlayed() {
+        return gamePlayed;
     }
 
     private class HoverClickListener extends ClickListener {
