@@ -115,7 +115,7 @@ public class FirstScreen implements Screen {
                 if (nextScreen != null) {
                     game.setScreen(nextScreen);
                 } else if (isExit) {
-                    saveCurrentGame();
+                    
                     Gdx.app.exit();
                 } else if (isLoad) {
                     loadSavedGame();
